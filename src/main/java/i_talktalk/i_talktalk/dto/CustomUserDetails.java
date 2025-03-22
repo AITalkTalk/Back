@@ -18,11 +18,13 @@ import java.util.stream.Collectors;
 @Builder
 public class CustomUserDetails implements UserDetails {
 
-    private Long member_id;
-
+    //기본으로 가져야 하는 정보
     private String username;
-
     private String password;
+
+    //내가 추가하고 싶은 정보
+    private Long member_id;
+    private String name;
 
     @Builder.Default
     private List<String> roles = new ArrayList<>();

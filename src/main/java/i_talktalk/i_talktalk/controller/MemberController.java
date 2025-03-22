@@ -1,15 +1,12 @@
 package i_talktalk.i_talktalk.controller;
 
+import i_talktalk.i_talktalk.dto.JwtToken;
 import i_talktalk.i_talktalk.dto.SignInDto;
 import i_talktalk.i_talktalk.dto.SignUpDto;
-import i_talktalk.i_talktalk.entity.Member;
-import i_talktalk.i_talktalk.repository.MemberRepository;
 import i_talktalk.i_talktalk.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,10 +33,17 @@ public class MemberController {
     }
 
     @PostMapping("/sign-in")
-    public String signin(@RequestBody SignInDto signInDto){//서비스단으로 옮겨야 함.
+    public JwtToken signin(@RequestBody SignInDto signInDto){
         String id = signInDto.getId();
         String password = signInDto.getPassword();
 
-        return memberService.signIn(id,password);
+        JwtToken jwtToken = memberService.signIn(id, password);
+        if(jwtToken == null){
+            log.info("인증 실패");
+            return null;
+        }else{
+            log.info("로그인 성공");
+            return jwtToken;
+        }
     }
 }
