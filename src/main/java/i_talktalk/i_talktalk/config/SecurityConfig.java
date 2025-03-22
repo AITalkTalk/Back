@@ -1,6 +1,8 @@
 package i_talktalk.i_talktalk.config;
 
 
+import i_talktalk.i_talktalk.filter.JwtAuthenticationFilter;
+import i_talktalk.i_talktalk.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final JwtTokenProvider jwtTokenProvider;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity.httpBasic((hp)->hp.disable())
@@ -23,10 +26,10 @@ public class SecurityConfig {
                 .csrf((cs)->cs.disable())
                 // JWT를 사용하기 때문에 세션을 사용하지 않음
                 .sessionManagement((sm)->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests((ahr)->ahr.anyRequest().permitAll())
-                .build();
+                .authorizeHttpRequests((ahr)->ahr.requestMatchers("/sign-up","sign-in").permitAll().anyRequest().authenticated())
+//                .build();
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
-//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class).build();
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class).build();
     }
     @Bean
     public PasswordEncoder passwordEncoder() {

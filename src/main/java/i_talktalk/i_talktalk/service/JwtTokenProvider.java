@@ -5,6 +5,7 @@ import i_talktalk.i_talktalk.dto.JwtToken;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,8 +42,6 @@ public class JwtTokenProvider {
 //                .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-
-        log.info("getName:::="+authentication.getName());
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + 86400000);
         String accessToken = Jwts.builder()
@@ -69,7 +69,8 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String accessToken) {
         // Jwt 토큰 복호화
         Claims claims = parseClaims(accessToken);
-
+        //role을 사용 안하더라도 최소한의 role이 있어야 인가에 성공함.
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
         // 클레임에서 권한 정보 가져오기
 //        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
 //                .map(SimpleGrantedAuthority::new)
@@ -85,7 +86,7 @@ public class JwtTokenProvider {
 //                        .map(GrantedAuthority::getAuthority)
 //                        .collect(Collectors.toList()))
                 .build();
-        return new UsernamePasswordAuthenticationToken(principal, "");
+        return new UsernamePasswordAuthenticationToken(principal, "",authorities);
     }
 
     // 토큰 정보를 검증하는 메서드
@@ -96,14 +97,8 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SignatureException e) {
             log.info("Invalid JWT Token", e);
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
         }
         return false;
     }

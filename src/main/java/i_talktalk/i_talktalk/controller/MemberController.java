@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class MemberController {
     private final MemberService memberService;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     @GetMapping("/test")
     public String test() {
         return "test";
