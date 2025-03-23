@@ -1,5 +1,6 @@
 package i_talktalk.i_talktalk.service;
 
+import i_talktalk.i_talktalk.dto.CustomUserDetails;
 import i_talktalk.i_talktalk.dto.JwtToken;
 import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.repository.MemberRepository;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,5 +51,22 @@ public class MemberService {
         }
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
         return jwtToken;
+    }
+
+    @Transactional
+    public String changeInfo(String name, String secret, String interest){
+        Optional<Member> found = memberRepository.findByName(name);
+        if(found.isPresent()){
+            return "이미 있는 사용자 이름입니다.";
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+        log.info("사용자 아이디: "+currentMember.getId());
+        currentMember.setName(name);
+        currentMember.setSecret(secret);
+        currentMember.setInterest(interest);
+        return "회원정보 수정 완료!";
     }
 }

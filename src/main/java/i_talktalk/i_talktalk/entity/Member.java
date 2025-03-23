@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Member {
+public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long member_id;
@@ -21,7 +21,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    @Column
+    @Column(unique = true)
     private String name;
 
     @Column

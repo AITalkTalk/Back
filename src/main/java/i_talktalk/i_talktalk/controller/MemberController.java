@@ -1,6 +1,7 @@
 package i_talktalk.i_talktalk.controller;
 
 import i_talktalk.i_talktalk.dto.JwtToken;
+import i_talktalk.i_talktalk.dto.MemberInfoDto;
 import i_talktalk.i_talktalk.dto.SignInDto;
 import i_talktalk.i_talktalk.dto.SignUpDto;
 import i_talktalk.i_talktalk.service.MemberService;
@@ -44,5 +45,10 @@ public class MemberController {
             log.info("로그인 성공");
             return jwtToken;
         }
+    }
+
+    @PostMapping("/changeinfo")
+    public String changeInfo(@RequestBody MemberInfoDto memberInfoDto){
+        return memberService.changeInfo(memberInfoDto.getName(),memberInfoDto.getSecret(),memberInfoDto.getInterest());
     }
 }
