@@ -1,11 +1,13 @@
 package i_talktalk.i_talktalk.entity;
 
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
 public class Friend {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long friend_id;
 
     @ManyToOne
@@ -19,4 +21,9 @@ public class Friend {
     @Column
     private boolean approved;
 
+    public Friend(Member member1, Member member2) {
+        this.member1 = member1;
+        this.member2 = member2;
+        this.approved = false;
+    }
 }

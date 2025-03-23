@@ -37,7 +37,7 @@ public class Member extends BaseEntity {
     public Member(String id, String password) {
         this.id = id;
         this.password = password;
-        this.name="";
+        this.name=id;//null이면 unique 조건때문에 오류나서 일단 id로 초기화
         this.point= 0L;
         this.secret = "";
         this.interest = "";
