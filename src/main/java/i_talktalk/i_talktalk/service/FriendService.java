@@ -5,6 +5,7 @@ import i_talktalk.i_talktalk.entity.Friend;
 import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.repository.FriendRepository;
 import i_talktalk.i_talktalk.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class FriendService {
     private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
@@ -40,13 +42,10 @@ public class FriendService {
     public List<String> showFriendRequests() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        log.info("000");
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
-        log.info("1111");
         List<Friend> found = friendRepository.findAllByMember2AndApprovedIsFalse(currentMember);
         if(found.isEmpty()){
-            log.info("2222");
             log.info("친구 요청이 없습니다.");
             LinkedList<String> friendRequests = new LinkedList<>();
             String s = "친구 요청이 없습니다";
@@ -54,8 +53,24 @@ public class FriendService {
             return friendRequests;
         }
 
-        log.info("3333");
         List<String> friendRequests = found.stream().map(friend -> friend.getMember1().getName()).toList();
         return friendRequests;
+    }
+
+    public String approveFriend(String name) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+        Optional<Member> requestedMember = memberRepository.findByName(name);
+        if(!requestedMember.isPresent()){
+            return "해당 유저는 친구 요청을 보내지 않았습니다.";
+        }
+
+        Optional<Friend> foundFriend = friendRepository.findByMember2AndMember1(currentMember, requestedMember.get());
+        if(!foundFriend.isPresent()){
+            return "친구 요청이 없습니다.";
+        }
+        foundFriend.get().setApproved(true);
+        return "친구 수락 완료!";
     }
 }

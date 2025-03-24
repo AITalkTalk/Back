@@ -3,10 +3,12 @@ package i_talktalk.i_talktalk.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @NoArgsConstructor
 @Getter
+@Setter
 public class Friend {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
