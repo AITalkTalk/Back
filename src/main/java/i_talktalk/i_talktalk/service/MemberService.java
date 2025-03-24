@@ -54,7 +54,7 @@ public class MemberService {
     }
 
     @Transactional
-    public String changeInfo(String name, String secret, String interest){
+    public String changeInfo(String name, Long age, String secret, String interest){
         Optional<Member> found = memberRepository.findByName(name);
         if(found.isPresent()){
             return "이미 있는 사용자 이름입니다.";
@@ -65,6 +65,7 @@ public class MemberService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
         log.info("사용자 아이디: "+currentMember.getId());
         currentMember.setName(name);
+        currentMember.setAge(age);
         currentMember.setSecret(secret);
         currentMember.setInterest(interest);
         return "회원정보 수정 완료!";

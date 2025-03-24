@@ -25,6 +25,9 @@ public class Member extends BaseEntity {
     private String name;
 
     @Column
+    private Long age;
+
+    @Column
     private Long point;
 
     @Column

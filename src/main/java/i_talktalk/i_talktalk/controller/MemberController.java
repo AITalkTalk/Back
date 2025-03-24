@@ -49,6 +49,6 @@ public class MemberController {
 
     @PostMapping("/changeinfo")
     public String changeInfo(@RequestBody MemberInfoDto memberInfoDto){
-        return memberService.changeInfo(memberInfoDto.getName(),memberInfoDto.getSecret(),memberInfoDto.getInterest());
+        return memberService.changeInfo(memberInfoDto.getName(), memberInfoDto.getAge(), memberInfoDto.getSecret(),memberInfoDto.getInterest());
     }
 }
