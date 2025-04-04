@@ -1,9 +1,12 @@
 package i_talktalk.i_talktalk.controller;
 
+import i_talktalk.i_talktalk.dto.ApiResponse;
 import i_talktalk.i_talktalk.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,19 +19,26 @@ public class FriendController {
 
     @PostMapping("/friends/requests")
     @Operation(summary = "친구 요청 API", description = "친구 이름을 통해 요청")
-    public String requestFriend(@RequestParam String name){
-        return friendService.requestFriend(name);
+    public ResponseEntity<ApiResponse<Void>> requestFriend(@RequestParam String name) {
+        friendService.requestFriend(name);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(HttpStatus.CREATED, "친구 요청이 완료되었습니다.", null));
     }
 
     @GetMapping("/friends/requests")
     @Operation(summary = "친구 리스트 확인 API", description = "나의 친구 목록 확인")
-    public List<String> showFriendRequests(){
-        return friendService.showFriendRequests();
+    public ResponseEntity<ApiResponse<List<String>>> showFriendRequests() {
+        List<String> friends = friendService.showFriendRequests();
+        return ResponseEntity
+                .ok(new ApiResponse<>(HttpStatus.OK, "친구 목록 조회 성공", friends));
     }
 
     @PatchMapping("/friends/approve")
     @Operation(summary = "친구 수락 API", description = "친구 이름을 통해 친구 추가 수락")
-    public String approveFriend(@RequestParam String name){
-        return friendService.approveFriend(name);
+    public ResponseEntity<ApiResponse<Void>> approveFriend(@RequestParam String name) {
+        friendService.approveFriend(name);
+        return ResponseEntity
+                .ok(new ApiResponse<>(HttpStatus.OK, "친구 요청을 수락했습니다.", null));
     }
 }
