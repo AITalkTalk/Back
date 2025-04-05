@@ -4,24 +4,36 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i_talktalk.i_talktalk.dto.ChatRequest;
 import i_talktalk.i_talktalk.dto.ChatResponse;
+import i_talktalk.i_talktalk.dto.CustomUserDetails;
 import i_talktalk.i_talktalk.dto.Message;
+import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.entity.Quiz;
+import i_talktalk.i_talktalk.entity.QuizMember;
+import i_talktalk.i_talktalk.repository.MemberRepository;
+import i_talktalk.i_talktalk.repository.QuizMemberRepository;
 import i_talktalk.i_talktalk.repository.QuizRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class QuizService {
     private final QuizRepository quizRepository;
+    private final QuizMemberRepository quizMemberRepository;
+    private final MemberRepository memberRepository;
 
     @Qualifier("openaiRestTemplate")
     @Autowired
@@ -80,11 +92,36 @@ public class QuizService {
             quizList = objectMapper.readValue(responseJson, new TypeReference<List<Quiz>>() {});
             quizRepository.saveAll(quizList);
 
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
         return responseJson;
+    }
+
+    public Quiz getNotSolvedQuiz(){
+        //현재 로그인한 사용자 불러오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+        //현재 사용자가 풀지 않은 문제 반환하기
+        List<QuizMember> solvedList = quizMemberRepository.findAllByMemberId(currentMember.getMember_id());
+        Set<String> solvedQuizIds = solvedList.stream()
+                .map(QuizMember::getQuizId)
+                .collect(Collectors.toSet());
+        List<Quiz> unsolved = quizRepository.findAllByIdNotIn(solvedQuizIds);
+        if(unsolved.isEmpty()){// 모든 문제를 풀었을 경우
+            return null;
+        }
+
+        // 하나 랜덤 선택
+        Quiz recommended = unsolved.get(ThreadLocalRandom.current().nextInt(unsolved.size()));
+        return recommended;
+
+
+
     }
 }

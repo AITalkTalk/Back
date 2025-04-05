@@ -1,8 +1,11 @@
 package i_talktalk.i_talktalk.controller;
 
+import i_talktalk.i_talktalk.entity.Quiz;
 import i_talktalk.i_talktalk.service.QuizService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -11,13 +14,22 @@ public class QuizController {
 
     private final QuizService quizService;
 
-    @GetMapping("/quiz/create")
+    @PostMapping("/quiz/create")
     public String createQuiz() {
         return quizService.createQuiz();
     }
 
 
-    //답안 제출 로직
+    @GetMapping("/quiz")
+    public ResponseEntity<Quiz> getQuiz() {
+        Quiz quiz = quizService.getNotSolvedQuiz();
+        if(quiz==null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(quiz);
+    }
+
+
 
 
 }
