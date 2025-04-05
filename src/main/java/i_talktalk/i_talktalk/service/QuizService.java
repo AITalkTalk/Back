@@ -14,6 +14,7 @@ import i_talktalk.i_talktalk.repository.QuizMemberRepository;
 import i_talktalk.i_talktalk.repository.QuizRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizMemberRepository quizMemberRepository;
@@ -109,6 +111,7 @@ public class QuizService {
 
         //현재 사용자가 풀지 않은 문제 반환하기
         List<QuizMember> solvedList = quizMemberRepository.findAllByMemberId(currentMember.getMember_id());
+        log.info("풀은 문제 수:"+ solvedList.size());
         Set<String> solvedQuizIds = solvedList.stream()
                 .map(QuizMember::getQuizId)
                 .collect(Collectors.toSet());
@@ -120,8 +123,16 @@ public class QuizService {
         // 하나 랜덤 선택
         Quiz recommended = unsolved.get(ThreadLocalRandom.current().nextInt(unsolved.size()));
         return recommended;
+    }
+
+    public QuizMember solve(String quizId){
+        //현재 로그인한 사용자 불러오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
 
-
+        QuizMember saved = quizMemberRepository.save(new QuizMember(currentMember.getMember_id(), quizId));
+        return saved;
     }
 }

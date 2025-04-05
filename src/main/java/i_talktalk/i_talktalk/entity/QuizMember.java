@@ -15,7 +15,12 @@ public class QuizMember {
     @Id
     private String id;
 
-    private String memberId;
+    private Long memberId;
 
     private String quizId;
+
+    public QuizMember(Long memberId, String quizId) {
+        this.memberId = memberId;
+        this.quizId = quizId;
+    }
 }
