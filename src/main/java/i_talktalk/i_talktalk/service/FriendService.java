@@ -32,11 +32,23 @@ public class FriendService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
         Optional<Member> found = memberRepository.findByName(name);
-        if(!found.isPresent()){
-            return "해당 이름의 유저가 없습니다.";
+        if (found.isEmpty()) {
+            throw new IllegalArgumentException("해당 이름의 유저가 없습니다.");
         }
+
+        // 본인한테 요청 방지
+        if (found.get().getId().equals(currentMember.getId())) {
+            throw new IllegalArgumentException("자기 자신에게는 친구 요청을 보낼 수 없습니다.");
+        }
+
+        // 이미 요청 보냈는지 확인 (승인되지 않은 요청 포함)
+        boolean alreadyRequested = friendRepository.existsByMember1AndMember2AndApprovedFalse(currentMember, found.get());
+        if (alreadyRequested) {
+            throw new IllegalArgumentException("이미 친구 요청을 보낸 사용자입니다.");
+        }
+
         friendRepository.save(new Friend(currentMember, found.get()));
-        return found.get().getName()+"님에게 친구 요청을 보냈습니다.";
+        return found.get().getName() + "님에게 친구 요청을 보냈습니다.";
     }
 
     public List<String> showFriendRequests() {
