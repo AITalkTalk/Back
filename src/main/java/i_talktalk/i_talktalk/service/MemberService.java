@@ -27,7 +27,7 @@ public class MemberService {
     public String signUp(String id, String password){
         Optional<Member> user = memberRepository.findById(id);
         if(user.isPresent()){
-            return "already exist"; //상태코드 반환하도록 수정해야함.
+            return "id already exist"; //상태코드 반환하도록 수정해야함.
         }
         Member member = new Member(id, password);
         memberRepository.save(member);

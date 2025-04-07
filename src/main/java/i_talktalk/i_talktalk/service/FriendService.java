@@ -32,7 +32,7 @@ public class FriendService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
         Optional<Member> found = memberRepository.findByName(name);
-        if (found.isEmpty()) {
+        if (!found.isPresent()) {
             throw new IllegalArgumentException("해당 이름의 유저가 없습니다.");
         }
 
@@ -42,7 +42,7 @@ public class FriendService {
         }
 
         // 이미 요청 보냈는지 확인 (승인되지 않은 요청 포함)
-        boolean alreadyRequested = friendRepository.existsByMember1AndMember2AndApprovedFalse(currentMember, found.get());
+        boolean alreadyRequested = friendRepository.existsByMember1AndMember2(currentMember, found.get()) || friendRepository.existsByMember1AndMember2(found.get(), currentMember);//approvefalse 제거 필요
         if (alreadyRequested) {
             throw new IllegalArgumentException("이미 친구 요청을 보낸 사용자입니다.");
         }
@@ -85,4 +85,30 @@ public class FriendService {
         foundFriend.get().setApproved(true);
         return "친구 수락 완료!";
     }
+
+//    public String deleteFriend(String name) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+//        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+//
+//        Optional<Member> friend = memberRepository.findByName(name);
+//
+//        if(!friend.isPresent()){
+//            return "없는 회원입니다.";
+//        }
+//
+//        Optional<Friend> foundFriend = friendRepository.findByMember2AndMember1(currentMember, friend.get());
+//        if(!foundFriend.isPresent()){
+//            foundFriend = friendRepository.findByMember2AndMember1(friend.get(), currentMember);
+//            if(foundFriend.isPresent()){
+//                friendRepository.delete(foundFriend.get());
+//                return "친구 삭제 완료";
+//            }else{
+//                return "친구가 아닙니다.";
+//            }
+//        }else{
+//            friendRepository.delete(foundFriend.get());
+//            return "친구 삭제 완료";
+//        }
+//    }
 }
