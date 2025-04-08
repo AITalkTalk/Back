@@ -3,6 +3,7 @@ package i_talktalk.i_talktalk.service;
 import i_talktalk.i_talktalk.dto.CustomUserDetails;
 import i_talktalk.i_talktalk.entity.Friend;
 import i_talktalk.i_talktalk.entity.Member;
+import i_talktalk.i_talktalk.exception.MemberNotFoundException;
 import i_talktalk.i_talktalk.repository.FriendRepository;
 import i_talktalk.i_talktalk.repository.MemberRepository;
 import jakarta.transaction.Transactional;
@@ -86,29 +87,25 @@ public class FriendService {
         return "친구 수락 완료!";
     }
 
-//    public String deleteFriend(String name) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-//        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
-//
-//        Optional<Member> friend = memberRepository.findByName(name);
-//
-//        if(!friend.isPresent()){
-//            return "없는 회원입니다.";
-//        }
-//
-//        Optional<Friend> foundFriend = friendRepository.findByMember2AndMember1(currentMember, friend.get());
-//        if(!foundFriend.isPresent()){
-//            foundFriend = friendRepository.findByMember2AndMember1(friend.get(), currentMember);
-//            if(foundFriend.isPresent()){
-//                friendRepository.delete(foundFriend.get());
+    public void deleteFriend(String name) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+        Member friend = memberRepository.findByName(name).orElseThrow(()->new MemberNotFoundException("없는 회원입니다."));
+
+        Optional<Friend> foundFriend = friendRepository.findByMember2AndMember1(currentMember, friend); // 없을때 에러도 생성해야함.
+        if(!foundFriend.isPresent()){
+            foundFriend = friendRepository.findByMember2AndMember1(friend, currentMember);
+            if(foundFriend.isPresent()){
+                friendRepository.delete(foundFriend.get());
 //                return "친구 삭제 완료";
-//            }else{
+            }else{
 //                return "친구가 아닙니다.";
-//            }
-//        }else{
-//            friendRepository.delete(foundFriend.get());
+            }
+        }else{
+            friendRepository.delete(foundFriend.get());
 //            return "친구 삭제 완료";
-//        }
-//    }
+        }
+    }
 }

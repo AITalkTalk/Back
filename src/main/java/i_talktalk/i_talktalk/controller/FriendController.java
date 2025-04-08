@@ -42,9 +42,11 @@ public class FriendController {
                 .ok(new ApiResponse<>(HttpStatus.OK, "친구 요청을 수락했습니다.", null));
     }
 
-//    @DeleteMapping("/friends")
-//    @Operation(summary = "친구 삭제 api", description = "파라미터로 전달받은 친구 이름을 통해 삭제")
-//    public ResponseEntity<ApiResponse<Void>> deleteFriend(@RequestParam String name) {
-//        boolean = friendService.deleteFriend(name);
-//    }
+    @DeleteMapping("/friends")
+    @Operation(summary = "친구 삭제 api", description = "파라미터로 전달받은 친구 이름을 통해 삭제")
+    public ResponseEntity<ApiResponse<Void>> deleteFriend(@RequestParam String name) {
+        friendService.deleteFriend(name);
+        return ResponseEntity
+                .ok(new ApiResponse<>(HttpStatus.OK, "친구를 삭제했습니다.", null));
+    }
 }
