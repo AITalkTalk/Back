@@ -12,6 +12,6 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     Optional<Friend> findByMember2AndMember1(Member member2, Member member1);
 
-    boolean existsByMember1AndMember2AndApprovedFalse(Member member1, Member member2);   //친구 요청을 이미 한 것인지 확인
+    boolean existsByMember1AndMember2(Member member1, Member member2);   //친구 요청을 이미 한 것인지 확인
 
 }
