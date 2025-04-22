@@ -24,8 +24,11 @@ repositories {
 }
 
 dependencies {
+	//ORM
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//문제 고속 조회를 위한 nosql db
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	//인증 인가 처리
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
