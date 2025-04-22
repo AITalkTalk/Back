@@ -122,7 +122,8 @@
 <br />
 
 ## 💁‍♂️ 프로젝트 팀원
-|Backend|Frontend|
-|:---:|:---:|
-| ![](https://github.com/yewon-Noh.png?size=120) | ![](https://github.com/SeongHo-C.png?size=120) |
-|[노예원](https://github.com/yewon-Noh)|[이성호](https://github.com/SeongHo-C)|
+| Frontend | Backend 1 | Backend 2 | AI |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/HeeEun-Lee.png?size=120" width="100"/> | <img src="https://github.com/kwjdgh1267.png?size=120" width="100"/> | <img src="https://github.com/hilees.png?size=120" width="100"/> | <img src="https://github.com/psh911.png?size=120" width="100"/> |
+| [이희은](https://github.com/HeeEun-Lee) | [김정호](https://github.com/kwjdgh1267) | [이승준](https://github.com/hilees) | [박수현](https://github.com/psh911) |
+
