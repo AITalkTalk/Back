@@ -51,7 +51,7 @@ public class FriendController {
     }
 
     @DeleteMapping("/friends")
-    @Operation(summary = "친구 삭제 api", description = "파라미터로 전달받은 친구 이름을 통해 삭제")
+    @Operation(summary = "친구 삭제 API", description = "파라미터로 전달받은 친구 이름을 통해 삭제")
     public ResponseEntity<ApiResponse<Void>> deleteFriend(@RequestParam String name) {
         friendService.deleteFriend(name);
         return ResponseEntity

@@ -25,7 +25,7 @@ public class MemberController {
     }
 
     @PostMapping("/sign-up")
-    @Operation(summary = "회원가입", description = "아이디와 비밀번호를 받아 회원가입을 수행")
+    @Operation(summary = "회원가입 API", description = "아이디와 비밀번호를 받아 회원가입을 수행")
     public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignUpDto signUpDto) {
         String result = memberService.signUp(signUpDto.getId(), signUpDto.getPassword());
         log.info("회원가입 결과: " + result);
@@ -35,7 +35,7 @@ public class MemberController {
     }
 
     @PostMapping("/sign-in")
-    @Operation(summary = "로그인", description = "아이디와 비밀번호를 받아 JWT 토큰을 발급")
+    @Operation(summary = "로그인 API", description = "아이디와 비밀번호를 받아 JWT 토큰을 발급")
     public ResponseEntity<ApiResponse<JwtToken>> signin(@RequestBody SignInDto signInDto) {
         JwtToken jwtToken = memberService.signIn(signInDto.getId(), signInDto.getPassword());
         if (jwtToken == null) {
@@ -49,7 +49,7 @@ public class MemberController {
     }
 
     @PostMapping("/changeinfo")
-    @Operation(summary = "회원 정보 변경", description = "이름, 나이, 비밀정보, 관심사 등을 수정")
+    @Operation(summary = "회원 정보 변경 API", description = "이름, 나이, 비밀정보, 관심사 등을 수정")
     @SecurityRequirement(name = "JWT")
     public ResponseEntity<ApiResponse<Void>> changeInfo(@RequestBody MemberInfoDto memberInfoDto) {
         String result = memberService.changeInfo(
