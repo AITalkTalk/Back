@@ -27,11 +27,11 @@ public class FriendController {
     }
 
     @GetMapping("/friends/requests")
-    @Operation(summary = "친구 리스트 확인 API", description = "나의 친구 목록 확인")
+    @Operation(summary = "친구 요청 확인 API", description = "나의 친구 요청 목록 확인")
     public ResponseEntity<ApiResponse<List<String>>> showFriendRequests() {
         List<String> friends = friendService.showFriendRequests();
         return ResponseEntity
-                .ok(new ApiResponse<>(HttpStatus.OK, "친구 목록 조회 성공", friends));
+                .ok(new ApiResponse<>(HttpStatus.OK, "친구 요청 목록 조회 성공", friends));
     }
 
     @PatchMapping("/friends/approve")
@@ -40,6 +40,14 @@ public class FriendController {
         friendService.approveFriend(name);
         return ResponseEntity
                 .ok(new ApiResponse<>(HttpStatus.OK, "친구 요청을 수락했습니다.", null));
+    }
+
+    @GetMapping("/friends")
+    @Operation(summary = "친구 목록 확인 API", description = "나의 친구 목록 확인")
+    public ResponseEntity<ApiResponse<List<String>>> showFriends() {
+        List<String> friends = friendService.showFriends();
+        return ResponseEntity
+                .ok(new ApiResponse<>(HttpStatus.OK, "친구 목록 조회 성공", friends));
     }
 
     @DeleteMapping("/friends")

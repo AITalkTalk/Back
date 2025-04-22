@@ -76,12 +76,12 @@ public class FriendService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
         Optional<Member> requestedMember = memberRepository.findByName(name);
         if(!requestedMember.isPresent()){
-            return "해당 유저는 친구 요청을 보내지 않았습니다.";
+            throw new MemberNotFoundException("없는 사용자 입니다.");
         }
 
         Optional<Friend> foundFriend = friendRepository.findByMember2AndMember1(currentMember, requestedMember.get());
         if(!foundFriend.isPresent()){
-            return "친구 요청이 없습니다.";
+            throw new MemberNotFoundException("친구 요청이 없습니다.");
         }
         foundFriend.get().setApproved(true);
         return "친구 수락 완료!";
@@ -107,5 +107,22 @@ public class FriendService {
             friendRepository.delete(foundFriend.get());
 //            return "친구 삭제 완료";
         }
+    }
+
+    public List<String> showFriends(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+        List<Friend> allApprovedByMember = friendRepository.findAllApprovedByMember(currentMember);
+        List<String> friends = new LinkedList<>();
+        for(Friend friend : allApprovedByMember){
+            if(friend.getMember1().getName().equals(currentMember.getName())){
+                friends.add(friend.getMember2().getName());
+            }else {
+                friends.add(friend.getMember1().getName());
+            }
+        }
+        return friends;
     }
 }

@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(HttpStatus.BAD_REQUEST, e.getMessage(), null));
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Exception.class) // 수정해야 할듯
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.", null));
