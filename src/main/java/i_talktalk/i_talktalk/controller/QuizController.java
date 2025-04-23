@@ -1,5 +1,6 @@
 package i_talktalk.i_talktalk.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import i_talktalk.i_talktalk.entity.Quiz;
 import i_talktalk.i_talktalk.service.QuizService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,9 @@ public class QuizController {
 
     //사용자가 풀지 않은 문제중 하나 출제하는 함수
     @GetMapping("/quiz")
-    public ResponseEntity<Quiz> getQuiz() {
-        Quiz quiz = quizService.getNotSolvedQuiz();
+    public ResponseEntity<Quiz> getQuiz() throws JsonProcessingException {
+//        Quiz quiz = quizService.getNotSolvedQuiz();
+        Quiz quiz = quizService.getNextQuiz();
         if(quiz==null){
             return ResponseEntity.notFound().build();
         }
@@ -33,7 +35,8 @@ public class QuizController {
     //정답처리를 하는 함수 (이후에 출제 안됨.)
     @PatchMapping("/quiz/solve")
     public ResponseEntity<Void> solveQuiz(@RequestParam String quizId){
-        quizService.solve(quizId);
+//        quizService.solve(quizId);
+        quizService.solve2(quizId);
         return ResponseEntity.ok().build();
     }
 
