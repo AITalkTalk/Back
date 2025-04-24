@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 || uri.startsWith("/webjars")
                 || uri.equals("/swagger-ui.html")
                 || uri.equals("/api-test")
+                || uri.equals("/quiz/create")
                 || uri.equals("/sign-in")
                 || uri.equals("/sign-up")) {
             chain.doFilter(request, response);
