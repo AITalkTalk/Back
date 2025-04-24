@@ -153,13 +153,6 @@ public class QuizService {
         String quizJson = redisTemplate.opsForList().leftPop(redisKey);
         if (quizJson == null) return null;
 
-        // 푼 문제 목록에 기록
-
-        //이쪽 분리해야 할듯???
-        redisTemplate.opsForList().rightPush(solvedKey, quizJson);
-        redisTemplate.opsForList().rightPush(backupKey, quizJson);
-        redisTemplate.expire(solvedKey, TTL);
-
         return objectMapper.readValue(quizJson, Quiz.class);
     }
 
@@ -225,14 +218,23 @@ public class QuizService {
         return saved;
     }
 
-    public QuizMember solve2(String quizId){
+    public void solve2(String quizId) throws JsonProcessingException {
+
         //현재 로그인한 사용자 불러오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+        Long userId = getCurrentUserId();
 
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow();
+        String quizJson = objectMapper.writeValueAsString(quiz);
 
-        QuizMember saved = quizMemberRepository.save(new QuizMember(currentMember.getMember_id(), quizId));
-        return saved;
+        String solvedKey = "quiz:solved:" + userId;
+        String backupKey = "quiz:solved:backup:" + userId;
+
+        // Redis에 저장
+        redisTemplate.opsForList().rightPush(solvedKey, quizJson);
+        redisTemplate.opsForList().rightPush(backupKey, quizJson);
+        redisTemplate.expire(solvedKey, TTL);
+
     }
+
+
 }

@@ -34,7 +34,7 @@ public class QuizController {
 
     //정답처리를 하는 함수 (이후에 출제 안됨.)
     @PatchMapping("/quiz/solve")
-    public ResponseEntity<Void> solveQuiz(@RequestParam String quizId){
+    public ResponseEntity<Void> solveQuiz(@RequestParam String quizId) throws JsonProcessingException {
 //        quizService.solve(quizId);
         quizService.solve2(quizId);
         return ResponseEntity.ok().build();
