@@ -28,6 +28,7 @@ public class QuizController {
 
     //사용자가 풀지 않은 문제중 하나 출제하는 함수
     @GetMapping("/quiz")
+    @Operation(summary = "퀴즈 조회 API", description = "사용자가 풀지 않은 문제 조회")
     public ResponseEntity<Quiz> getQuiz() throws JsonProcessingException {
 //        Quiz quiz = quizService.getNotSolvedQuiz();
         Quiz quiz = quizService.getNextQuiz();
@@ -39,6 +40,7 @@ public class QuizController {
 
     //정답처리를 하는 함수 (이후에 출제 안됨.)
     @PatchMapping("/quiz/solve")
+    @Operation(summary = "퀴즈 정답 처리 API", description = "퀴즈를 맞히면 풀이 처리")
     public ResponseEntity<Void> solveQuiz(@RequestParam String quizId) throws JsonProcessingException {
 //        quizService.solve(quizId);
         quizService.solve2(quizId);
