@@ -63,7 +63,7 @@
 |<img src="https://user-images.githubusercontent.com/80824750/208456048-acbf44a8-cd71-4132-b35a-500047adbe1c.gif" width="400"/>|<img src="https://user-images.githubusercontent.com/80824750/208456234-fb5fe434-aa65-4d7a-b955-89098d5bbe0b.gif" width="400"/>|
 
 ### 프로토타입
-<img src="https://user-images.githubusercontent.com/80824750/208454673-0449e49c-57c6-4a6b-86cf-66c5b1e623dc.png">
+![KakaoTalk Screenshot](./images/KakaoTalk_20250422_190238785.png)
 
 <br />
 
@@ -122,7 +122,8 @@
 <br />
 
 ## 💁‍♂️ 프로젝트 팀원
-|Backend|Frontend|
-|:---:|:---:|
-| ![](https://github.com/yewon-Noh.png?size=120) | ![](https://github.com/SeongHo-C.png?size=120) |
-|[노예원](https://github.com/yewon-Noh)|[이성호](https://github.com/SeongHo-C)|
+| Frontend | Backend 1 | Backend 2 | AI |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/HeeEun-Lee.png?size=120" width="100"/> | <img src="https://github.com/kwjdgh1267.png?size=120" width="100"/> | <img src="https://github.com/hilees.png?size=120" width="100"/> | <img src="https://github.com/psh911.png?size=120" width="100"/> |
+| [이희은](https://github.com/HeeEun-Lee) | [김정호](https://github.com/kwjdgh1267) | [이승준](https://github.com/hilees) | [박수현](https://github.com/psh911) |
+

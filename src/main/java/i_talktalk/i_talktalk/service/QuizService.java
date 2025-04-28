@@ -1,5 +1,6 @@
 package i_talktalk.i_talktalk.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i_talktalk.i_talktalk.dto.ChatRequest;
@@ -18,11 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,6 +39,11 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizMemberRepository quizMemberRepository;
     private final MemberRepository memberRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    private static final int CACHE_SIZE = 5;
+    private static final Duration TTL = Duration.ofMinutes(1);
 
     @Qualifier("openaiRestTemplate")
     @Autowired
@@ -125,6 +133,80 @@ public class QuizService {
         return recommended;
     }
 
+    public Quiz getNextQuiz() throws JsonProcessingException {
+
+        //지금 ttl 끝났을때 다음 요청 없으면 정답 처리가 안됨. 이벤트 기반으로 해야 할듯?
+
+        Long userId = getCurrentUserId();
+        String redisKey = "quiz:user:" + userId;
+        String solvedKey = "quiz:solved:" + userId;
+        String backupKey = "quiz:solved:backup:" + userId;
+
+        // Redis에 캐시된 퀴즈가 없으면 새로 로드
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(redisKey)) || redisTemplate.opsForList().size(redisKey) == 0) {
+            log.info("문제 5개 로드!");
+            handleSolvedQuizzes(userId, backupKey); // TTL 만료되었거나 마지막 문제까지 풀었을 때 처리
+            loadQuizzesToRedis(userId, redisKey);
+        }
+
+        // 퀴즈 하나 꺼내기
+        String quizJson = redisTemplate.opsForList().leftPop(redisKey);
+        if (quizJson == null) return null;
+
+        return objectMapper.readValue(quizJson, Quiz.class);
+    }
+
+
+    public void loadQuizzesToRedis(Long userId, String redisKey) throws JsonProcessingException {
+        Set<String> solvedIds = quizMemberRepository.findAllByMemberId(userId)
+                .stream()
+                .map(QuizMember::getQuizId)
+                .collect(Collectors.toSet());
+
+        List<Quiz> unsolvedQuizzes = quizRepository.findAllByIdNotIn(solvedIds);
+        List<Quiz> cacheList = unsolvedQuizzes.stream()
+                .limit(CACHE_SIZE)
+                .map(q -> new Quiz(q.getId(), q.getQuestion(), q.getChoices(), q.getAnswer(), q.getCategory()))
+                .collect(Collectors.toList());
+
+        for (Quiz quiz : cacheList) {
+            String json = objectMapper.writeValueAsString(quiz);
+            redisTemplate.opsForList().rightPush(redisKey, json);
+        }
+
+        redisTemplate.expire(redisKey, TTL);
+    }
+
+    public void handleSolvedQuizzes(Long userId, String backupKey) throws JsonProcessingException {
+        List<String> solvedJsonList = redisTemplate.opsForList().range(backupKey, 0, -1);
+        if (solvedJsonList == null || solvedJsonList.isEmpty()) return;
+
+        List<QuizMember> records = solvedJsonList.stream()
+                .map(json -> {
+                    try {
+                        Quiz quiz = objectMapper.readValue(json, Quiz.class);
+                        return new QuizMember(userId, quiz.getId());
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+
+        quizMemberRepository.saveAll(records);
+        redisTemplate.delete(backupKey); // 꼭 삭제해야 메모리 누수 방지
+    }
+
+
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return memberRepository.findById(userDetails.getUsername()).orElseThrow().getMember_id();
+    }
+
+
+
+
     public QuizMember solve(String quizId){
         //현재 로그인한 사용자 불러오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -135,4 +217,24 @@ public class QuizService {
         QuizMember saved = quizMemberRepository.save(new QuizMember(currentMember.getMember_id(), quizId));
         return saved;
     }
+
+    public void solve2(String quizId) throws JsonProcessingException {
+
+        //현재 로그인한 사용자 불러오기
+        Long userId = getCurrentUserId();
+
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow();
+        String quizJson = objectMapper.writeValueAsString(quiz);
+
+        String solvedKey = "quiz:solved:" + userId;
+        String backupKey = "quiz:solved:backup:" + userId;
+
+        // Redis에 저장
+        redisTemplate.opsForList().rightPush(solvedKey, quizJson);
+        redisTemplate.opsForList().rightPush(backupKey, quizJson);
+        redisTemplate.expire(solvedKey, TTL);
+
+    }
+
+
 }

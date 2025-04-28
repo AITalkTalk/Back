@@ -32,7 +32,8 @@ public class SecurityConfig {
                         "/swagger-resources/**",
                         "/swagger-ui.html",
                         "/webjars/**",
-                        "/api-test"
+                        "/api-test",
+                        "/quiz/create"
                 ).permitAll().requestMatchers("/sign-up","sign-in").permitAll().anyRequest().authenticated())
 //                .build();
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
