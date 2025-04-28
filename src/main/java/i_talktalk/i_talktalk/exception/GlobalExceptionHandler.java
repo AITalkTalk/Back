@@ -3,6 +3,7 @@ package i_talktalk.i_talktalk.exception;
 import i_talktalk.i_talktalk.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 
 //컨트롤러 단위로 매번 try-catch를 쓰는 대신, 모든 예외를 한 곳에서 처리하도록 해주는 중앙 예외 처리기
@@ -26,4 +27,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiResponse<>(HttpStatus.NOT_FOUND, ex.getMessage(), null));
     }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ApiResponse<>(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.", null));
+    }
+
 }
