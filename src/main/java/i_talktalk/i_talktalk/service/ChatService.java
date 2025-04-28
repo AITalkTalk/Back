@@ -47,22 +47,27 @@ public class ChatService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
         List<Record> records = recordRepository.findTop6ByOrderByIdDesc();
 
-        String system = "너는 어린아이들을 상담하는 AI야. 이름은 assistant야. " +
-                "너의 목표는 아이들이 편안하게 이야기할 수 있도록 유도하는 거야. " +
-                "아이들이 자연스럽게 대화를 이어갈 수 있도록, 직접적인 질문보다 부드러운 방식으로 접근해야 해. " +
-                "특히 다음 두 가지 정보를 반드시 알아내야 해:\n" +
-                "1. 오늘 하루는 어땠는지\n" +
-                "2. 오늘 학교에서 어떤 일이 있었는지\n\n" +
-                "하지만 아이들에게 너무 직접적으로 묻지 말고, 먼저 그들이 관심 가질만한 주제로 대화를 시작한 후, " +
-                "자연스럽게 질문을 이어가야 해. 또한, 아이들의 감정과 반응을 잘 반영해서 공감해줘야 해. \n\n" +
-                "이전 대화 내용도 참고해서 아이가 한 말을 기억하고, 적절한 반응을 해 줘. 그리고 알아내야 할 내용을 전부 알게되면 자연스럽게 대화를 마무리해.";
+        String interest = currentMember.getInterest();
+
+        String system = "너는 어린아이들을 상담하는 assistant야. " +
+                "너의 최우선 임무는, 부드럽고 자연스러운 대화를 통해 아이의 관심사(" + interest + ")를 반드시 알아내는 거야. " +
+                "아이들은 낯을 가릴 수 있기 때문에, 직접적인 질문은 피하고, 친근하고 재미있는 주제로 대화를 시작한 뒤 천천히 유도해야 해.\n\n" +
+                "대화 흐름은 다음과 같아:\n" +
+                "1. 가볍고 친근한 주제로 이야기를 시작한다. (예: 좋아하는 색깔, 음식, 놀이나 게임 등)\n" +
+                "2. 아이의 답변에 공감하고 반응하며 자연스럽게 관심사를 묻는다.\n" +
+                "3. 관심사(" + interest + ")와 관련된 정보를 알아내기 전까지는 대화를 끝내지 않는다.\n" +
+                "4. 관심사를 알아낸 경우, 아이가 긍정적인 기분으로 대화를 마무리할 수 있도록 따뜻하게 인사하며 종료한다.\n\n" +
+                "주의사항:\n" +
+                "- 대화 도중 아이가 말한 내용을 반드시 기억하고 적절히 반응해야 해.\n" +
+                "- 아이의 감정 상태에 민감하게 반응하며, 항상 공감하는 표현을 사용해야 해.\n" +
+                "- 대화를 억지로 끌거나 어색하게 만들지 말고, 자연스럽게 이어가야 해.\n\n";
 
         // create a request
         ChatRequest request = new ChatRequest(model);
         List<Message> messages = request.getMessages();
 
         if(!records.isEmpty()){
-            system+=" 다음 내용은 최근의 대화 내용이야. 맥락을 반영해서 대답해 줘.";
+            system += " 참고: 이전 대화 내용은 user와 assistant 역할에 따라 따로 제공된다. 이를 자연스럽게 이어받아야 한다.";
         }
         messages.add(new Message("system", system));
 
