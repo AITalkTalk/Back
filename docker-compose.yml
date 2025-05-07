@@ -1,7 +1,7 @@
 services:
 
   spring:
-    image: kwjdgh/italk
+    image: kwjdgh/italktalk
     networks:
       - mynetwork
     ports:
