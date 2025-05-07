@@ -36,8 +36,8 @@ jobs:
       - name: Docker build & push to docker repo
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{secrets.DOCKER_REPOSITORY}}:italktalk .
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:italktalk
+          docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{secrets.DOCKER_REPOSITORY}}:italk .
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:italk
 
       - name: Create config directory on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -68,7 +68,7 @@ jobs:
           script_stop: true
           script: |
             echo ${{ secrets.DOCKER_PASSWORD }} | sudo docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:italktalk
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:italk
             cd /home/ubuntu/config
             sudo docker compose rm -fs spring
             sudo docker compose up -d spring
