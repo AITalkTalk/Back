@@ -1,7 +1,7 @@
 services:
 
   spring:
-    image: kwjdgh/taba
+    image: kwjdgh/taba:italk
     container_name: webserver
     networks:
       - mynetwork
