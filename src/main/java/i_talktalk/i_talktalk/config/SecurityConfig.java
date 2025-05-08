@@ -24,6 +24,7 @@ public class SecurityConfig {
         return httpSecurity.httpBasic((hp)->hp.disable())
                 // REST API이므로 basic auth 및 csrf 보안을 사용하지 않음
                 .csrf((cs)->cs.disable())
+                .httpBasic((hp) -> hp.disable())  // 기본 인증 비활성화
                 // JWT를 사용하기 때문에 세션을 사용하지 않음
                 .sessionManagement((sm)->sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((ahr)->ahr.requestMatchers(
