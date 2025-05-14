@@ -30,14 +30,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
         String uri = httpRequest.getRequestURI();
         if (uri.startsWith("/swagger-ui")
-                || uri.startsWith("/v3/api-docs")
-                || uri.startsWith("/swagger-resources")
-                || uri.startsWith("/webjars")
-                || uri.equals("/swagger-ui.html")
-                || uri.equals("/api-test")
-                || uri.equals("/quiz/create")
-                || uri.equals("/sign-in")
-                || uri.equals("/sign-up")) {
+                 uri.startsWith("/v3/api-docs")
+                 uri.startsWith("/swagger-resources")
+                 uri.startsWith("/webjars")
+                 uri.equals("/swagger-ui.html")
+                 uri.equals("/api-test")
+                 uri.equals("/quiz/create")
+                 uri.equals("/sign-in")
+                 uri.equals("/sign-up")) {
             chain.doFilter(request, response);
             return;
         }
