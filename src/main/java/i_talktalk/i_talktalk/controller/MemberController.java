@@ -65,7 +65,7 @@ public class MemberController {
     @GetMapping("/info")
     @Operation(summary = "회원 정보 조회 API", description = "회원 정보를 조회")
     @SecurityRequirement(name = "JWT")
-    public ResponseEntity<ApiResponse<MemberInfoDto>> getInfo(@RequestBody MemberInfoDto memberInfoDto){
+    public ResponseEntity<ApiResponse<MemberInfoDto>> getInfo(){
         MemberInfoDto info = memberService.getInfo();
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK,"회원 정보 조회 완료",info));
     }
