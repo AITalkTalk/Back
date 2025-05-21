@@ -2,6 +2,7 @@ package i_talktalk.i_talktalk.service;
 
 import i_talktalk.i_talktalk.dto.CustomUserDetails;
 import i_talktalk.i_talktalk.dto.JwtToken;
+import i_talktalk.i_talktalk.dto.MemberInfoDto;
 import i_talktalk.i_talktalk.dto.SignUpDto;
 import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.repository.MemberRepository;
@@ -70,5 +71,21 @@ public class MemberService {
         currentMember.setSecret(secret);
         currentMember.setInterest(interest);
         return "회원정보 수정 완료!";
+    }
+
+    @Transactional
+    public MemberInfoDto getInfo(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+        MemberInfoDto dto = new MemberInfoDto();
+        dto.setAge(currentMember.getAge());
+        dto.setName(currentMember.getName());
+        dto.setPoint(currentMember.getPoint());
+        dto.setInterest(currentMember.getInterest());
+
+
+        return dto;
     }
 }
