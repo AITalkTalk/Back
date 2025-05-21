@@ -1,6 +1,7 @@
 package i_talktalk.i_talktalk.controller;
 
 import i_talktalk.i_talktalk.dto.*;
+import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -58,6 +59,15 @@ public class MemberController {
                 memberInfoDto.getSecret(),
                 memberInfoDto.getInterest()
         );
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK, result, null));
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK, "회원 정보 수정 완료", null));
     }
+
+    @GetMapping("/info")
+    @Operation(summary = "회원 정보 조회 API", description = "회원 정보를 조회")
+    @SecurityRequirement(name = "JWT")
+    public ResponseEntity<ApiResponse<MemberInfoDto>> getInfo(@RequestBody MemberInfoDto memberInfoDto){
+        MemberInfoDto info = memberService.getInfo();
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK,"회원 정보 조회 완료",info));
+    }
+
 }

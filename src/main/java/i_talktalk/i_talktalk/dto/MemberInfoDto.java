@@ -6,6 +6,7 @@ import lombok.Data;
 public class MemberInfoDto {
     private String name;
     private Long age;
+    private Long point;
     private String secret;
     private String interest;
 }
