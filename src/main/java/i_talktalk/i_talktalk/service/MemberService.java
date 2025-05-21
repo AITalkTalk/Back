@@ -2,6 +2,7 @@ package i_talktalk.i_talktalk.service;
 
 import i_talktalk.i_talktalk.dto.CustomUserDetails;
 import i_talktalk.i_talktalk.dto.JwtToken;
+import i_talktalk.i_talktalk.dto.SignUpDto;
 import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +25,12 @@ public class MemberService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     @Transactional
-    public String signUp(String id, String password){
-        Optional<Member> user = memberRepository.findById(id);
+    public String signUp(SignUpDto signUpDto){
+        Optional<Member> user = memberRepository.findById(signUpDto.getId());
         if(user.isPresent()){
             return "id already exist"; //상태코드 반환하도록 수정해야함.
         }
-        Member member = new Member(id, password);
+        Member member = new Member(signUpDto);
         memberRepository.save(member);
         return "sign up";
     }
