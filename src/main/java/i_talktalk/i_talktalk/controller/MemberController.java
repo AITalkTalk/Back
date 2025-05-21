@@ -27,7 +27,7 @@ public class MemberController {
     @PostMapping("/sign-up")
     @Operation(summary = "회원가입 API", description = "아이디와 비밀번호를 받아 회원가입을 수행")
     public ResponseEntity<ApiResponse<Void>> signup(@RequestBody SignUpDto signUpDto) {
-        String result = memberService.signUp(signUpDto.getId(), signUpDto.getPassword());
+        String result = memberService.signUp(signUpDto);
         log.info("회원가입 결과: " + result);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

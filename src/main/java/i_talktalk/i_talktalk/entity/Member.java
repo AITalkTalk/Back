@@ -1,5 +1,6 @@
 package i_talktalk.i_talktalk.entity;
 
+import i_talktalk.i_talktalk.dto.SignUpDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,5 +45,15 @@ public class Member extends BaseEntity {
         this.point= 0L;
         this.secret = "";
         this.interest = "";
+    }
+
+    public Member(SignUpDto signUpDto) {
+        this.id = signUpDto.getId();
+        this.password = signUpDto.getPassword();
+        this.name= signUpDto.getName();
+        this.age = signUpDto.getAge();
+        this.point= 0L;
+        this.secret = signUpDto.getSecret();
+        this.interest = signUpDto.getInterest();
     }
 }
