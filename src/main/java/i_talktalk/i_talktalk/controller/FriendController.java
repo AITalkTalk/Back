@@ -1,6 +1,7 @@
 package i_talktalk.i_talktalk.controller;
 
 import i_talktalk.i_talktalk.dto.ApiResponse;
+import i_talktalk.i_talktalk.dto.RetrieveMember;
 import i_talktalk.i_talktalk.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,4 +58,13 @@ public class FriendController {
         return ResponseEntity
                 .ok(new ApiResponse<>(HttpStatus.OK, "친구를 삭제했습니다.", null));
     }
+
+    @GetMapping("/friends/requests/{name}")
+    @Operation(summary = "친구 이름 조회 API", description = "이름을 통해 친구 목록 요청")
+    public ResponseEntity<ApiResponse<List<RetrieveMember>>> retrieveFriend(@PathVariable String name) {
+        List<RetrieveMember> retrieveMembers = friendService.retrieveMembers(name);
+        return ResponseEntity
+                .ok(new ApiResponse<>(HttpStatus.OK, "친구 조회가 완료되었습니다.", retrieveMembers));
+    }
+
 }
