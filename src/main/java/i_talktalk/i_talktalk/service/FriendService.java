@@ -1,6 +1,7 @@
 package i_talktalk.i_talktalk.service;
 
 import i_talktalk.i_talktalk.dto.CustomUserDetails;
+import i_talktalk.i_talktalk.dto.RetrieveMember;
 import i_talktalk.i_talktalk.entity.Friend;
 import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.exception.MemberNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -124,5 +126,14 @@ public class FriendService {
             }
         }
         return friends;
+    }
+
+    public List<RetrieveMember> retrieveMembers(String name) {
+        List<RetrieveMember> members = memberRepository.findAllByName(name);
+        if (members.isEmpty()) {
+            throw new MemberNotFoundException("해당 이름의 유저가 존재하지 않습니다.");
+        }
+
+        return members;
     }
 }
