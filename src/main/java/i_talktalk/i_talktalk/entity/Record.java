@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document(collection = "records")
 @Getter
 @Setter
@@ -18,6 +20,10 @@ public class Record {
 
     private Message message;
 
+    private String sentiment;
+
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
@@ -25,5 +31,7 @@ public class Record {
     public Record(Message message, Member member) {
         this.message = message;
         this.member = member;
+        this.sentiment=null;
+        this.createdAt=LocalDateTime.now();
     }
 }

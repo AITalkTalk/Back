@@ -1,0 +1,131 @@
+package i_talktalk.i_talktalk.service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import i_talktalk.i_talktalk.dto.AnalyzedMessage;
+import i_talktalk.i_talktalk.dto.ChatRequest;
+import i_talktalk.i_talktalk.dto.ChatResponse;
+import i_talktalk.i_talktalk.dto.Message;
+import i_talktalk.i_talktalk.entity.DailyEmotionSummary;
+import i_talktalk.i_talktalk.entity.Record;
+import i_talktalk.i_talktalk.repository.DailyEmotionSummaryRepository;
+import i_talktalk.i_talktalk.repository.RecordRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class DailyEmotionSummaryService {
+    private final DailyEmotionSummaryRepository dailyEmotionSummaryRepository;
+    private final RecordRepository recordRepository;
+
+    @Qualifier("openaiRestTemplate")
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${openai.model}")
+    private String model;
+
+    @Value("${openai.api.url}")
+    private String apiUrl;
+
+    public void analyzeAndStore(String Id, LocalDateTime start, LocalDateTime end) throws JsonProcessingException {
+        List<Record> records = recordRepository.findByIdAndCreatedAtBetween(Id, start, end);
+
+        if (records.isEmpty()) return;
+
+        // 사용자 메시지만 추출해서 분석용 JSON 생성
+        List<Map<String, String>> userMessagesForAnalysis = records.stream()
+                .filter(record -> "user".equalsIgnoreCase(record.getMessage().getRole()))
+                .map(record -> Map.of(
+                        "id", record.getId(),
+                        "message", record.getMessage().getContent()
+                ))
+                .toList();
+
+        // 프롬프트 메시지 생성
+        String system = "You are a helpful assistant that classifies the emotional sentiment of conversations.";
+
+        ChatRequest request = new ChatRequest(model);
+        List<Message> messages = request.getMessages();
+        messages.add(new Message("system", system));
+        messages.add(new Message("user",
+                "Please determine whether the following conversation is positive, negative, or neutral. " +
+                        "Respond with one of the three: 'Positive', 'Negative', or 'Neutral'.\n\n" +
+                        "감정분석은 사용자의 대화만 해주고, 결과는 다음과 같은 형식으로 사용자 메시지만 반환해줘:\n\n" +
+                        "[\n" +
+                        "  {\n" +
+                        "    \"id\": \"record1234\",\n" +
+                        "    \"message\": \"오늘 너무 힘들었어. 아무것도 하기 싫어.\",\n" +
+                        "    \"sentiment\": \"NEGATIVE\"\n" +
+                        "  }\n" +
+                        "]\n\n" +
+                        "다음은 대화 내용이야:\n" + userMessagesForAnalysis
+        ));
+
+        // OpenAI 호출
+        ChatResponse response = restTemplate.postForObject(apiUrl, request, ChatResponse.class);
+
+        // 응답 결과 파싱
+        ObjectMapper mapper = new ObjectMapper();
+        List<AnalyzedMessage> analyzedMessages = mapper.readValue(
+                response.getChoices().get(0).getMessage().getContent(),
+                new TypeReference<List<AnalyzedMessage>>() {}
+        );
+
+        // 감정 분석 결과를 Map으로 변환 (id → sentiment)
+        Map<String, String> sentimentMap = analyzedMessages.stream()
+                .collect(Collectors.toMap(AnalyzedMessage::getId, AnalyzedMessage::getSentiment));
+
+        boolean hasNegative = false;
+
+        // 각 레코드에 감정 저장
+        for (Record record : records) {
+            String sentiment = sentimentMap.get(record.getId());
+            if (sentiment != null) {
+                record.setSentiment(sentiment);
+                recordRepository.save(record);
+                if ("NEGATIVE".equalsIgnoreCase(sentiment)) {
+                    hasNegative = true;
+                }
+            }
+        }
+
+        // fullChat 생성 (ai + user 대화 모두 포함, user만 감정 태깅)
+        String fullChat = records.stream()
+                .map(record -> {
+                    String role = record.getMessage().getRole();
+                    String content = record.getMessage().getContent();
+
+                    if ("user".equalsIgnoreCase(role)) {
+                        String sentiment = sentimentMap.get(record.getId());
+                        return "사용자: " + content + (sentiment != null ? " (" + sentiment + ")" : "");
+                    } else {
+                        return "ai: " + content;
+                    }
+                })
+                .collect(Collectors.joining("\n"));
+
+        // 일일 감정 요약 저장
+        DailyEmotionSummary summary = new DailyEmotionSummary();
+        summary.setMemberId(Long.parseLong(Id));
+        summary.setDate(start.toLocalDate());
+        summary.setSentiment(hasNegative ? "NEGATIVE" : "POSITIVE");
+        summary.setChat(fullChat);
+
+        dailyEmotionSummaryRepository.save(summary);
+    }
+
+
+}
