@@ -12,6 +12,7 @@ import i_talktalk.i_talktalk.entity.Record;
 import i_talktalk.i_talktalk.repository.DailyEmotionSummaryRepository;
 import i_talktalk.i_talktalk.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DailyEmotionSummaryService {
     private final DailyEmotionSummaryRepository dailyEmotionSummaryRepository;
     private final RecordRepository recordRepository;
@@ -41,9 +43,14 @@ public class DailyEmotionSummaryService {
     private String apiUrl;
 
     public void analyzeAndStore(String Id, LocalDateTime start, LocalDateTime end) throws JsonProcessingException {
-        List<Record> records = recordRepository.findByIdAndCreatedAtBetween(Id, start, end);
+        List<Record> records = recordRepository.findByMember_IdAndCreatedAtBetween(Id, start, end);
 
-        if (records.isEmpty()) return;
+        if (records.isEmpty()) {
+            log.info("데이터 없음!!!");
+            return;
+        }
+        log.info("분석 시작!!!");
+
 
         // 사용자 메시지만 추출해서 분석용 JSON 생성
         List<Map<String, String>> userMessagesForAnalysis = records.stream()
@@ -54,29 +61,32 @@ public class DailyEmotionSummaryService {
                 ))
                 .toList();
 
+
         // 프롬프트 메시지 생성
-        String system = "You are a helpful assistant that classifies the emotional sentiment of conversations.";
+        String system = "You are a helpful assistant that classifies the emotional sentiment of conversations. Please determine whether the following conversation is positive, negative, or neutral."
+                +"감정분석은 사용자의 대화만 해주고, 결과는 다음과 같은 형식으로 사용자 메시지만 반환해줘:\n\n" +
+                "[\n" +
+                "  {\n" +
+                "    \"id\": \"record1234\",\n" +
+                "    \"message\": \"오늘 너무 힘들었어. 아무것도 하기 싫어.\",\n" +
+                "    \"sentiment\": \"NEGATIVE\"\n" +
+                "  }\n" +
+                "]\n\n";
 
         ChatRequest request = new ChatRequest(model);
         List<Message> messages = request.getMessages();
         messages.add(new Message("system", system));
         messages.add(new Message("user",
-                "Please determine whether the following conversation is positive, negative, or neutral. " +
-                        "Respond with one of the three: 'Positive', 'Negative', or 'Neutral'.\n\n" +
-                        "감정분석은 사용자의 대화만 해주고, 결과는 다음과 같은 형식으로 사용자 메시지만 반환해줘:\n\n" +
-                        "[\n" +
-                        "  {\n" +
-                        "    \"id\": \"record1234\",\n" +
-                        "    \"message\": \"오늘 너무 힘들었어. 아무것도 하기 싫어.\",\n" +
-                        "    \"sentiment\": \"NEGATIVE\"\n" +
-                        "  }\n" +
-                        "]\n\n" +
                         "다음은 대화 내용이야:\n" + userMessagesForAnalysis
         ));
+
+        log.info(userMessagesForAnalysis.toString());
+
 
         // OpenAI 호출
         ChatResponse response = restTemplate.postForObject(apiUrl, request, ChatResponse.class);
 
+        log.info(response.getChoices().get(0).getMessage().getContent());
         // 응답 결과 파싱
         ObjectMapper mapper = new ObjectMapper();
         List<AnalyzedMessage> analyzedMessages = mapper.readValue(
@@ -119,13 +129,11 @@ public class DailyEmotionSummaryService {
 
         // 일일 감정 요약 저장
         DailyEmotionSummary summary = new DailyEmotionSummary();
-        summary.setMemberId(Long.parseLong(Id));
+        summary.setMemberId(Id);
         summary.setDate(start.toLocalDate());
         summary.setSentiment(hasNegative ? "NEGATIVE" : "POSITIVE");
         summary.setChat(fullChat);
 
         dailyEmotionSummaryRepository.save(summary);
     }
-
-
 }

@@ -1,13 +1,13 @@
 services:
 
-  spring:
-    image: kwjdgh/taba:italk
-    container_name: webserver
-    networks:
-      - mynetwork
-    ports:
-      - "8080:8080"
-    restart: always
+#  spring:
+#    image: kwjdgh/taba:italk
+#    container_name: webserver
+#    networks:
+#      - mynetwork
+#    ports:
+#      - "8080:8080"
+#    restart: always
 
   redis:
     image: redis:latest
@@ -20,34 +20,34 @@ services:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
 
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 1267
-      MYSQL_DATABASE: italktalk
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - mynetwork
-
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    networks:
-      - mynetwork
-
-volumes:
-  mysql_data:
-  mongodb_data:
+#  mysql:
+#    image: mysql:8.0
+#    container_name: mysql
+#    restart: always
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 1267
+#      MYSQL_DATABASE: italktalk
+#    ports:
+#      - "3307:3306"
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#    networks:
+#      - mynetwork
+#
+#  mongodb:
+#    image: mongo:latest
+#    container_name: mongodb
+#    restart: always
+#    ports:
+#      - "27017:27017"
+#    volumes:
+#      - mongodb_data:/data/db
+#    networks:
+#      - mynetwork
+#
+#volumes:
+#  mysql_data:
+#  mongodb_data:
 
 networks:
   mynetwork:
