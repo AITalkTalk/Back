@@ -11,5 +11,6 @@ public interface RecordRepository extends MongoRepository<Record, String> {
 
     List<Record> findTop6ByOrderByIdDesc();
 
-    List<Record> findByIdAndCreatedAtBetween(String id, LocalDateTime start, LocalDateTime end);
+    List<Record> findByMember_IdAndCreatedAtBetween(String loginId, LocalDateTime start, LocalDateTime end);
+
 }
