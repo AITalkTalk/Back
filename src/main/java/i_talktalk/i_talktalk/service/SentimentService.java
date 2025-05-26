@@ -19,7 +19,7 @@ public class SentimentService {
     private final MemberRepository memberRepository;
     private final DailyEmotionSummaryService dailyEmotionSummaryService;
 
-    @Scheduled(cron = "0 0 0 * * *") // 매일 00:00:00
+    @Scheduled(cron = "0 0 * * * *") // 매일 00:00:00
     @Transactional
     public void runDailySentimentAnalysis() throws JsonProcessingException {
         LocalDate targetDate = LocalDate.now().minusDays(1);
