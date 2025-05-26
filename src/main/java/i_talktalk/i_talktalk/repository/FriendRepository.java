@@ -1,5 +1,6 @@
 package i_talktalk.i_talktalk.repository;
 
+import i_talktalk.i_talktalk.dto.RankDto;
 import i_talktalk.i_talktalk.entity.Friend;
 import i_talktalk.i_talktalk.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,18 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     @Query("select f from Friend f where f.approved = true and (f.member1 = :member or f.member2 = :member)")
     List<Friend> findAllApprovedByMember(Member member);
+
+    @Query("""
+    select new i_talktalk.i_talktalk.dto.RankDto(m.name, m.point)
+    from Member m 
+    where m in (
+        select f.member1 from Friend f where f.member2 = :member
+    ) 
+    or m in (
+        select f.member2 from Friend f where f.member1 = :member
+    )
+    or m = :member
+    order by m.point desc
+    """)
+    List<RankDto> findAllApprovedByMemberForRank(Member member);
 }

@@ -1,6 +1,7 @@
 package i_talktalk.i_talktalk.controller;
 
 import i_talktalk.i_talktalk.dto.ApiResponse;
+import i_talktalk.i_talktalk.dto.RankDto;
 import i_talktalk.i_talktalk.dto.RetrieveMember;
 import i_talktalk.i_talktalk.service.FriendService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,6 +66,14 @@ public class FriendController {
         List<RetrieveMember> retrieveMembers = friendService.retrieveMembers(name);
         return ResponseEntity
                 .ok(new ApiResponse<>(HttpStatus.OK, "친구 조회가 완료되었습니다.", retrieveMembers));
+    }
+
+    @GetMapping("/friends/rank")
+    @Operation(summary = "친구 랭킹 API", description = "친구 랭킹 목록 요청")
+    public ResponseEntity<ApiResponse<List<RankDto>>> rankFriend() {
+        List<RankDto> rankMembers = friendService.rankfriend();
+        return ResponseEntity
+                .ok(new ApiResponse<>(HttpStatus.OK, "랭킹 조회가 완료되었습니다.", rankMembers));
     }
 
 }

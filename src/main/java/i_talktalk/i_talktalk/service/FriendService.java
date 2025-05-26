@@ -1,6 +1,7 @@
 package i_talktalk.i_talktalk.service;
 
 import i_talktalk.i_talktalk.dto.CustomUserDetails;
+import i_talktalk.i_talktalk.dto.RankDto;
 import i_talktalk.i_talktalk.dto.RetrieveMember;
 import i_talktalk.i_talktalk.entity.Friend;
 import i_talktalk.i_talktalk.entity.Member;
@@ -133,6 +134,21 @@ public class FriendService {
         if (members.isEmpty()) {
             throw new MemberNotFoundException("해당 이름의 유저가 존재하지 않습니다.");
         }
+
+        return members;
+    }
+
+    public List<RankDto> rankfriend() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+        List<RankDto> members = friendRepository.findAllApprovedByMemberForRank(currentMember);
+
+        if (members.isEmpty()) {
+            throw new MemberNotFoundException("해당 유저의 친구가 존재하지 않습니다.");
+        }
+
 
         return members;
     }
