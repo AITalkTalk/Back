@@ -18,7 +18,7 @@ public class DailyEmotionSummary {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    private String memberId;
+    private String name;
 
     private LocalDate date;
 
