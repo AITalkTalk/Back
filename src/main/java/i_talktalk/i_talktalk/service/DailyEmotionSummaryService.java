@@ -3,26 +3,31 @@ package i_talktalk.i_talktalk.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i_talktalk.i_talktalk.dto.AnalyzedMessage;
-import i_talktalk.i_talktalk.dto.ChatRequest;
-import i_talktalk.i_talktalk.dto.ChatResponse;
-import i_talktalk.i_talktalk.dto.Message;
+import i_talktalk.i_talktalk.dto.*;
 import i_talktalk.i_talktalk.entity.DailyEmotionSummary;
+import i_talktalk.i_talktalk.entity.Member;
 import i_talktalk.i_talktalk.entity.Record;
+import i_talktalk.i_talktalk.exception.MemberNotFoundException;
 import i_talktalk.i_talktalk.repository.DailyEmotionSummaryRepository;
+import i_talktalk.i_talktalk.repository.MemberRepository;
 import i_talktalk.i_talktalk.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +36,7 @@ import java.util.stream.Collectors;
 public class DailyEmotionSummaryService {
     private final DailyEmotionSummaryRepository dailyEmotionSummaryRepository;
     private final RecordRepository recordRepository;
+    private final MemberRepository memberRepository;
 
     @Qualifier("openaiRestTemplate")
     @Autowired
@@ -127,13 +133,43 @@ public class DailyEmotionSummaryService {
                 })
                 .collect(Collectors.joining("\n"));
 
+
+        Optional<Member> found = memberRepository.findById(Id);
         // 일일 감정 요약 저장
         DailyEmotionSummary summary = new DailyEmotionSummary();
-        summary.setMemberId(Id);
+        summary.setName(found.get().getName());//
         summary.setDate(start.toLocalDate());
         summary.setSentiment(hasNegative ? "NEGATIVE" : "POSITIVE");
         summary.setChat(fullChat);
 
         dailyEmotionSummaryRepository.save(summary);
+    }
+
+
+
+    public DailyEmotionSummaryDto getDailyEmotionSummary(LocalDate date) {//단건 조회
+
+
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+
+        log.info("1111");
+//        DailyEmotionSummary summary = dailyEmotionSummaryRepository.findByNameAndDate(currentMember.getName(),date);
+
+
+
+        log.info("조회 조건 → name: {}, date: {}", currentMember.getName(), date);
+        DailyEmotionSummary summary = dailyEmotionSummaryRepository
+                .findByNameAndDate(currentMember.getName(), date)
+                .orElseThrow(() -> new MemberNotFoundException("기록이 없습니다."));
+
+
+
+        log.info("2222");
+        return new DailyEmotionSummaryDto(summary.getId(), summary.getName(), summary.getDate(), summary.getSentiment(), summary.getChat());
+
     }
 }
