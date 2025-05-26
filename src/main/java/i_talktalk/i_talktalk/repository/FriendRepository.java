@@ -28,6 +28,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     or m in (
         select f.member2 from Friend f where f.member1 = :member
     )
+    or m = :member
     order by m.point desc
     """)
     List<RankDto> findAllApprovedByMemberForRank(Member member);
