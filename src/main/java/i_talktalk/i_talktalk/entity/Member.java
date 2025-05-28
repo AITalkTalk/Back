@@ -2,7 +2,6 @@ package i_talktalk.i_talktalk.entity;
 
 import i_talktalk.i_talktalk.dto.SignUpDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,7 @@ import lombok.Setter;
 public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long member_id;
+    private Long memberId;
 
     @Column(nullable = false)
     private String id;

@@ -15,6 +15,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     public Optional<Member> findByName(String name);
 
+    public Optional<Member> findByMemberId(Long member_id);
+
     @Query("SELECT new i_talktalk.i_talktalk.dto.RetrieveMember(m.name, m.id, m.age) FROM Member m WHERE m.name = :name")
     List<RetrieveMember> findAllByName(@Param("name") String name);
 

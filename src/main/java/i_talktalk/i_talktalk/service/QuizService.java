@@ -27,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -118,7 +119,7 @@ public class QuizService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
         //현재 사용자가 풀지 않은 문제 반환하기
-        List<QuizMember> solvedList = quizMemberRepository.findAllByMemberId(currentMember.getMember_id());
+        List<QuizMember> solvedList = quizMemberRepository.findAllByMemberId(currentMember.getMemberId());
         log.info("풀은 문제 수:"+ solvedList.size());
         Set<String> solvedQuizIds = solvedList.stream()
                 .map(QuizMember::getQuizId)
@@ -134,8 +135,6 @@ public class QuizService {
     }
 
     public Quiz getNextQuiz() throws JsonProcessingException {
-
-        //지금 ttl 끝났을때 다음 요청 없으면 정답 처리가 안됨. 이벤트 기반으로 해야 할듯?
 
         Long userId = getCurrentUserId();
         String redisKey = "quiz:user:" + userId;
@@ -179,12 +178,19 @@ public class QuizService {
 
     public void handleSolvedQuizzes(Long userId, String backupKey) throws JsonProcessingException {
         List<String> solvedJsonList = redisTemplate.opsForList().range(backupKey, 0, -1);
+
+
+        Optional<Member> found = memberRepository.findByMemberId(userId);
+        Member foundMember = found.get();
+
+
         if (solvedJsonList == null || solvedJsonList.isEmpty()) return;
 
         List<QuizMember> records = solvedJsonList.stream()
                 .map(json -> {
                     try {
                         Quiz quiz = objectMapper.readValue(json, Quiz.class);
+                        foundMember.setPoint(foundMember.getPoint()+1);
                         return new QuizMember(userId, quiz.getId());
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
@@ -201,7 +207,7 @@ public class QuizService {
     private Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return memberRepository.findById(userDetails.getUsername()).orElseThrow().getMember_id();
+        return memberRepository.findById(userDetails.getUsername()).orElseThrow().getMemberId();
     }
 
 
@@ -214,7 +220,7 @@ public class QuizService {
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
 
-        QuizMember saved = quizMemberRepository.save(new QuizMember(currentMember.getMember_id(), quizId));
+        QuizMember saved = quizMemberRepository.save(new QuizMember(currentMember.getMemberId(), quizId));
         return saved;
     }
 
