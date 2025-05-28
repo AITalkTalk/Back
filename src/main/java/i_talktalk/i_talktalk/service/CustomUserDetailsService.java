@@ -10,8 +10,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -32,7 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private UserDetails createUserDetails(Member member) {
         return CustomUserDetails.builder()
                 .username(member.getId())//필수
-                .member_id(member.getMember_id())//내가 추가한 것
+                .member_id(member.getMemberId())//내가 추가한 것
                 .name(member.getName())//내가 추가한 것
                 .password(passwordEncoder.encode(member.getPassword()))//필수
 //                .roles(Arrays.asList(member.getRoles().toArray(new String[0]))) // 배열을 리스트로 변환
