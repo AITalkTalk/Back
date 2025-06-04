@@ -34,4 +34,11 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다.", null));
     }
 
+    @ExceptionHandler(SecretMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSecretMismatch(SecretMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse<>(HttpStatus.UNAUTHORIZED, ex.getMessage(), null));
+    }
+
+
 }

@@ -70,4 +70,13 @@ public class MemberController {
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK,"회원 정보 조회 완료",info));
     }
 
+    @PostMapping("/secret")
+    @Operation(summary = "회원 비밀 키 인증 API", description = "비밀키 인증")
+    @SecurityRequirement(name = "JWT")
+    public ResponseEntity<ApiResponse<Void>> checkSecret(@RequestParam String secret){
+        String result = memberService.checkSecret(secret);
+            return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK, result, null));
+
+    }
+
 }
