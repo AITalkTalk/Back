@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,5 +23,13 @@ public class DailyEmotionSummaryController {
     public ResponseEntity<ApiResponse<DailyEmotionSummaryDto>> getDailyEmotionSummary(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         DailyEmotionSummaryDto dto = dailyEmotionSummaryService.getDailyEmotionSummary(date);
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK,"감정 분석 조회 성공",dto));
+    }
+
+    @GetMapping("/monthsummary")
+    public ResponseEntity<ApiResponse<List<DailyEmotionSummaryDto>>> getMonthlySummary(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date){
+        List<DailyEmotionSummaryDto> summaryDtos = dailyEmotionSummaryService.getMonthlyEmotionSummary(date);
+
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK,"월간 분석 조회 성공",summaryDtos));
+
     }
 }
