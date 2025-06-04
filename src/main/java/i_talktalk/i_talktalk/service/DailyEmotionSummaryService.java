@@ -148,28 +148,35 @@ public class DailyEmotionSummaryService {
 
 
     public DailyEmotionSummaryDto getDailyEmotionSummary(LocalDate date) {//단건 조회
-
-
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
 
-
-        log.info("1111");
 //        DailyEmotionSummary summary = dailyEmotionSummaryRepository.findByNameAndDate(currentMember.getName(),date);
-
-
-
         log.info("조회 조건 → name: {}, date: {}", currentMember.getName(), date);
         DailyEmotionSummary summary = dailyEmotionSummaryRepository
                 .findByNameAndDate(currentMember.getName(), date)
                 .orElseThrow(() -> new MemberNotFoundException("기록이 없습니다."));
 
-
-
-        log.info("2222");
         return new DailyEmotionSummaryDto(summary.getId(), summary.getName(), summary.getDate(), summary.getSentiment(), summary.getChat());
-
     }
+
+
+    public List<DailyEmotionSummaryDto> getMonthlyEmotionSummary(LocalDate date) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername())
+                .orElseThrow(() -> new MemberNotFoundException("사용자 정보를 찾을 수 없습니다."));
+
+        LocalDate startOfMonth = date.withDayOfMonth(1);
+        LocalDate endOfMonth = date.withDayOfMonth(date.lengthOfMonth());
+
+        List<DailyEmotionSummary> summaries = dailyEmotionSummaryRepository
+                .findAllByNameAndDateBetween(currentMember.getName(), startOfMonth, endOfMonth);
+
+        List<DailyEmotionSummaryDto> summaryDtos = summaries.stream().map(s -> new DailyEmotionSummaryDto(null, null,s.getDate(), s.getSentiment(),null)).collect(Collectors.toList());
+
+        return summaryDtos;
+    }
+
 }
