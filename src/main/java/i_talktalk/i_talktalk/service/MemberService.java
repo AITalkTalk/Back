@@ -5,6 +5,7 @@ import i_talktalk.i_talktalk.dto.JwtToken;
 import i_talktalk.i_talktalk.dto.MemberInfoDto;
 import i_talktalk.i_talktalk.dto.SignUpDto;
 import i_talktalk.i_talktalk.entity.Member;
+import i_talktalk.i_talktalk.exception.SecretMismatchException;
 import i_talktalk.i_talktalk.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,5 +88,17 @@ public class MemberService {
 
 
         return dto;
+    }
+
+    public String checkSecret(String secret) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
+
+        if (!currentMember.getSecret().equals(secret)) {
+            throw new SecretMismatchException("비밀키가 일치하지 않습니다.");
+        }
+
+        return "비밀키 인증 성공";
     }
 }
