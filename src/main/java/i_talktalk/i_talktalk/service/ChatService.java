@@ -45,7 +45,8 @@ public class ChatService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Member currentMember = memberRepository.findById(userDetails.getUsername()).get();
-        List<Record> records = recordRepository.findTop6ByOrderByIdDesc();
+//        List<Record> records = recordRepository.findTop6ByOrderByIdDesc();
+        List<Record> records = recordRepository.findTop4ByOrderByIdDesc();
 
         String interest = currentMember.getInterest();
 
@@ -60,7 +61,7 @@ public class ChatService {
                 "주의사항:\n" +
                 "- 대화 도중 아이가 말한 내용을 반드시 기억하고 적절히 반응해야 해.\n" +
                 "- 아이의 감정 상태에 민감하게 반응하며, 항상 공감하는 표현을 사용해야 해.\n" +
-                "- 답변에 이모지를 사용하지 말고 2~3문장으로 간결하게 대답해줘.\n" +
+                "- 답변에 이모지를 사용하지 말고 ***1~2문장으로*** ***간결하게*** 대답해줘.\n" +
                 "- 대화를 억지로 끌거나 어색하게 만들지 말고, 자연스럽게 이어가야 해.\n\n";
 
 //        String system = "You are an assistant who talks with young children. " +
