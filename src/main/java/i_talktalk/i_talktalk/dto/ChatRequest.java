@@ -12,13 +12,15 @@ public class ChatRequest {
 
     private String model;
     private List<Message> messages;
+    private int max_token;
 //    private int n=1;
 //    private double temperature;
 
     public ChatRequest(String model) {
         this.model = model;
-
+        this.max_token=300;
         this.messages = new ArrayList<>();
+
     }
 
     // getters and setters
