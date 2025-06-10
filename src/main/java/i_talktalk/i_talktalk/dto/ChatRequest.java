@@ -19,9 +19,9 @@ public class ChatRequest {
 
     public ChatRequest(String model) {
         this.model = model;
-        this.max_tokens=120;
+        this.max_tokens=160;
         this.messages = new ArrayList<>();
-        this.temperature = 0.2;
+        this.temperature = 0.5;
     }
 
     // getters and setters
