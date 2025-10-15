@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Tag(name = "회원 API", description = "회원가입, 로그인, 정보 변경 관련 API")
 public class MemberController {
+    //ffdff
 
     private final MemberService memberService;
 
