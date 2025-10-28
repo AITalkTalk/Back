@@ -19,7 +19,7 @@ public class ChatRequest {
 
     public ChatRequest(String model) {
         this.model = model;
-        //this.max_tokens=160;
+        this.max_tokens=2000;
         this.messages = new ArrayList<>();
         this.temperature = 0.5;
     }
